@@ -9,7 +9,8 @@
     "lint": "eslint",
     "db:migrate": "tsx --env-file-if-exists=.env.local scripts/migrate.ts",
     "typecheck": "tsc --noEmit",
-    "test:contract": "tsx --env-file-if-exists=.env.local scripts/contract-test.ts"
+    "test:contract": "tsx --env-file-if-exists=.env.local scripts/contract-test.ts",
+    "seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts"
   },
   "dependencies": {
     "@vercel/functions": "^3.11.3",

@@ -1,7 +1,7 @@
 import "server-only";
 import { createHash, randomUUID } from "node:crypto";
 import { getPool, pgErrorCode, withTransaction } from "./db";
-import type { ApiResult, Booking, SlotWithAvailability } from "./types";
+import type { ApiResult, Booking, Slot, SlotWithAvailability } from "./types";
 import { normalizeEmail, parseLimit, validateNewBooking, validateResetBody } from "./validation";
 
 export const RATE_LIMIT_MAX_ATTEMPTS = 5;
@@ -91,15 +91,14 @@ export async function listSlots(provider: string | null): Promise<SlotWithAvaila
   }));
 }
 
-/** For the web UI: slot details by id (null if it doesn't exist). */
-export async function getSlot(id: string): Promise<SlotWithAvailability | null> {
-  const { rows } = await getPool().query(
-    `SELECT s.id, s.provider, s.start_raw AS start, s.end_raw AS end,
-            NOT EXISTS (SELECT 1 FROM bookings b WHERE b.slot_id = s.id AND b.status = 'confirmed') AS available
-       FROM slots s WHERE s.id = $1`,
-    [id],
+/** For the web UI: slot details keyed by id. */
+export async function getSlotsByIds(ids: string[]): Promise<Map<string, Slot>> {
+  if (ids.length === 0) return new Map();
+  const { rows } = await getPool().query<Slot>(
+    `SELECT id, provider, start_raw AS start, end_raw AS end FROM slots WHERE id = ANY($1::text[])`,
+    [ids],
   );
-  return rows[0] ?? null;
+  return new Map(rows.map((s) => [s.id, s]));
 }
 
 /* ------------------------------------------------------------------ */

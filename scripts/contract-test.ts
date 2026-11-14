@@ -5,6 +5,7 @@
  *
  * WARNING: calls POST /reset, which wipes all bookings on the target.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- loosely typed JSON responses in tests */
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 
