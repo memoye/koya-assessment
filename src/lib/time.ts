@@ -28,7 +28,3 @@ export function dayKey(iso: string, timeZone: string) {
   // en-CA gives YYYY-MM-DD, which sorts and groups cleanly.
   return new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone }).format(new Date(iso));
 }
-
-export function formatDateTime(iso: string, timeZone: string) {
-  return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone }).format(new Date(iso));
-}

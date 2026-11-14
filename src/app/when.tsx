@@ -1,18 +1,13 @@
 "use client";
 
-import { formatDateTime, formatDay, formatTime, useTimeZone } from "@/lib/time";
+import { formatDay, formatTime, useTimeZone } from "@/lib/time";
 
-/** Slot date/time in the viewer's time zone (UTC during SSR/hydration). */
-export function SlotWhen({ start, end }: { start: string; end: string }) {
+/** "Monday 16 November, 10:00–10:30" in the viewer's time zone. */
+export function When({ start, end }: { start: string; end: string }) {
   const tz = useTimeZone();
   return (
-    <span>
-      {formatDay(start, tz)}, {formatTime(start, tz)} – {formatTime(end, tz)}
-    </span>
+    <>
+      {formatDay(start, tz)}, {formatTime(start, tz)}–{formatTime(end, tz)}
+    </>
   );
-}
-
-export function LocalDateTime({ iso }: { iso: string }) {
-  const tz = useTimeZone();
-  return <span>{formatDateTime(iso, tz)}</span>;
 }

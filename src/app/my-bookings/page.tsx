@@ -2,101 +2,72 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { getSlotsByIds, listBookings } from "@/lib/service";
-import { StatusBadge } from "@/app/status-badge";
-import { SlotWhen } from "@/app/when";
-
-const PAGE_SIZE = "5";
+import { When } from "@/app/when";
 
 export default function MyBookingsPage({ searchParams }: PageProps<"/my-bookings">) {
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="text-3xl font-semibold tracking-tight">My bookings</h1>
-      <p className="mt-2 text-muted">Enter the email you booked with to see your appointments.</p>
-      <Suspense fallback={<div className="mt-8 h-40 animate-pulse rounded-2xl bg-border/60" />}>
+    <>
+      <h1 className="text-2xl font-semibold tracking-tight">My bookings</h1>
+      <Suspense>
         <Results searchParams={searchParams} />
       </Suspense>
-    </div>
+    </>
   );
 }
 
 async function Results({ searchParams }: { searchParams: PageProps<"/my-bookings">["searchParams"] }) {
-  const sp = await searchParams;
-  const email = typeof sp.email === "string" ? sp.email : "";
-  const cursor = typeof sp.cursor === "string" ? sp.cursor : null;
+  const { email, cursor } = await searchParams;
 
   return (
     <>
-      <form action="/my-bookings" className="mt-6 flex gap-2">
-        <input
-          name="email"
-          type="email"
-          required
-          defaultValue={email}
-          placeholder="you@example.com"
-          aria-label="Email"
-          className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
-        />
-        <button className="rounded-lg bg-accent px-4 py-2 font-medium text-accent-foreground hover:opacity-90">
-          Look up
-        </button>
+      <form className="mt-6 flex gap-2">
+        <input name="email" type="email" required placeholder="Email" aria-label="Email" defaultValue={email} className="field" />
+        <button className="btn bg-foreground text-background">Look up</button>
       </form>
-      {email && <BookingList email={email} cursor={cursor} />}
+      {typeof email === "string" && email && (
+        <Suspense fallback={<div className="mt-6 h-32 animate-pulse rounded-xl bg-border/50" />}>
+          <BookingList email={email} cursor={typeof cursor === "string" ? cursor : null} />
+        </Suspense>
+      )}
     </>
   );
 }
 
 async function BookingList({ email, cursor }: { email: string; cursor: string | null }) {
   await connection();
-  const result = await listBookings({ email, limit: PAGE_SIZE, cursor });
-  if (!("bookings" in result.body)) {
-    return <p className="mt-6 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">{result.body.error}</p>;
-  }
-  const { bookings, next_cursor } = result.body;
-  const slots = await getSlotsByIds([...new Set(bookings.map((b) => b.slot_id))]);
+  const result = await listBookings({ email, limit: "10", cursor });
+  if (!("bookings" in result.body)) return <p className="mt-6 text-danger">{result.body.error}</p>;
 
-  if (bookings.length === 0) {
-    return (
-      <div className="mt-8 rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-sm text-muted">
-        {cursor ? "No more bookings." : "No bookings found for that email."}
-      </div>
-    );
-  }
+  const { bookings, next_cursor } = result.body;
+  if (bookings.length === 0) return <p className="mt-6 text-muted">No bookings.</p>;
+  const slots = await getSlotsByIds(bookings.map((b) => b.slot_id));
 
   return (
-    <div className="mt-8">
-      <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface">
+    <>
+      <ul className="mt-6 divide-y divide-border rounded-xl border border-border bg-surface">
         {bookings.map((b) => {
           const slot = slots.get(b.slot_id);
           return (
             <li key={b.id}>
-              <Link href={`/booking/${b.id}`} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-background">
-                <div className="min-w-0">
-                  <p className="font-medium">{slot?.provider ?? b.slot_id}</p>
-                  <p className="text-sm text-muted">{slot ? <SlotWhen start={slot.start} end={slot.end} /> : "Slot removed"}</p>
-                </div>
-                <StatusBadge status={b.status} />
+              <Link
+                href={`/booking/${b.id}`}
+                className={`block px-5 py-3 hover:bg-background ${b.status === "cancelled" ? "text-muted line-through" : ""}`}
+              >
+                <span className="font-medium">{slot?.provider}</span>
+                <span className="block text-sm text-muted">{slot && <When start={slot.start} end={slot.end} />}</span>
               </Link>
             </li>
           );
         })}
       </ul>
-      <div className="mt-4 flex justify-between text-sm">
-        {cursor ? (
-          <Link href={`/my-bookings?email=${encodeURIComponent(email)}`} className="text-muted hover:text-foreground">
-            ← First page
-          </Link>
-        ) : (
-          <span />
-        )}
-        {next_cursor && (
-          <Link
-            href={`/my-bookings?email=${encodeURIComponent(email)}&cursor=${encodeURIComponent(next_cursor)}`}
-            className="font-medium text-accent hover:underline"
-          >
-            Next page →
-          </Link>
-        )}
-      </div>
-    </div>
+      {next_cursor && (
+        <Link
+          href={`/my-bookings?email=${encodeURIComponent(email)}&cursor=${encodeURIComponent(next_cursor)}`}
+          className="mt-4 inline-block text-sm text-muted hover:text-foreground"
+        >
+          Next →
+        </Link>
+      )}
+    </>
   );
 }
