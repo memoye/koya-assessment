@@ -2,7 +2,9 @@
 
 import { dateParts, formatDay, formatTime, useTimeZone } from "@/lib/time";
 
-/** "Monday 16 November, 10:00–10:30" in the viewer's time zone. */
+// Client components so dates render in the viewer's time zone.
+
+/** "Monday 16 November, 10:00–10:30" */
 export function When({ start, end }: { start: string; end: string }) {
   const tz = useTimeZone();
   return (
@@ -12,17 +14,32 @@ export function When({ start, end }: { start: string; end: string }) {
   );
 }
 
+/** "Monday 16 November" */
+export function DayText({ iso }: { iso: string }) {
+  return <>{formatDay(iso, useTimeZone())}</>;
+}
+
+/** "10:00–10:30" */
+export function TimeRange({ start, end }: { start: string; end: string }) {
+  const tz = useTimeZone();
+  return (
+    <>
+      {formatTime(start, tz)}–{formatTime(end, tz)}
+    </>
+  );
+}
+
 /** A small calendar tile: month over day number. */
 export function DateTile({ iso, muted }: { iso: string; muted?: boolean }) {
   const d = dateParts(iso, useTimeZone());
   return (
     <span
-      className={`flex size-12 shrink-0 flex-col items-center justify-center rounded-xl ${
-        muted ? "bg-background text-muted" : "bg-accent-soft text-accent"
+      className={`flex w-11 shrink-0 flex-col items-center rounded-md border py-1 ${
+        muted ? "border-border text-muted" : "border-accent/25 bg-accent-soft text-accent"
       }`}
     >
-      <span className="text-[11px] font-medium uppercase leading-none">{d.month}</span>
-      <span className="text-lg font-semibold leading-tight tabular-nums">{d.day}</span>
+      <span className="text-[11px] font-medium uppercase">{d.month}</span>
+      <span className="text-lg leading-tight font-semibold tabular-nums">{d.day}</span>
     </span>
   );
 }

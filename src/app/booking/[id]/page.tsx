@@ -1,14 +1,15 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { CalendarDays, Check, Stethoscope, UserRound, X } from "lucide-react";
+import { CalendarPlus, Check } from "lucide-react";
 import { getBooking, getSlotsByIds } from "@/lib/service";
-import { When } from "@/app/when";
+import { Avatar } from "@/app/avatar";
+import { DayText, TimeRange } from "@/app/when";
 import { CancelButton } from "./cancel-button";
 
 export default function BookingPage({ params }: PageProps<"/booking/[id]">) {
   return (
-    <Suspense fallback={<div className="card mx-auto h-80 max-w-md animate-pulse" />}>
+    <Suspense fallback={<div className="card h-80 animate-pulse" />}>
       <Booking params={params} />
     </Suspense>
   );
@@ -24,50 +25,51 @@ async function Booking({ params }: { params: PageProps<"/booking/[id]">["params"
   const confirmed = booking.status === "confirmed";
 
   return (
-    <div className="mx-auto max-w-md">
-      <div className="flex flex-col items-center text-center">
-        <span
-          className={`grid size-14 place-items-center rounded-full ${
-            confirmed ? "bg-accent text-on-accent" : "bg-border text-muted"
-          }`}
-        >
-          {confirmed ? <Check size={28} strokeWidth={2.5} aria-hidden /> : <X size={28} aria-hidden />}
-        </span>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight">
-          {confirmed ? "You’re booked" : "Appointment cancelled"}
-        </h1>
+    <>
+      {confirmed ? (
+        <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-accent">
+          <Check size={16} strokeWidth={2.5} aria-hidden /> Confirmed
+        </p>
+      ) : (
+        <p className="mb-2 text-sm font-medium text-muted">Cancelled</p>
+      )}
+      <h1>{confirmed ? "You’re booked" : "This appointment was cancelled"}</h1>
+
+      <div className={`card mt-6 ${confirmed ? "" : "text-muted"}`}>
+        {slot && (
+          <div className="flex items-center gap-3.5 border-b border-border p-4">
+            <Avatar name={slot.provider} />
+            <p className="font-medium">{slot.provider}</p>
+          </div>
+        )}
+        <dl className="grid grid-cols-[6rem_1fr] gap-x-4 gap-y-3 p-4">
+          {slot && (
+            <>
+              <dt className="text-muted">Date</dt>
+              <dd>
+                <DayText iso={slot.start} />
+              </dd>
+              <dt className="text-muted">Time</dt>
+              <dd>
+                <TimeRange start={slot.start} end={slot.end} />
+              </dd>
+            </>
+          )}
+          <dt className="text-muted">Patient</dt>
+          <dd>{booking.name}</dd>
+          <dt className="text-muted">Email</dt>
+          <dd className="break-all">{booking.email}</dd>
+        </dl>
       </div>
 
-      <ul className={`card mt-8 divide-y divide-border text-[15px] ${confirmed ? "" : "text-muted"}`}>
-        {slot && (
-          <>
-            <Detail icon={<Stethoscope size={18} />}>{slot.provider}</Detail>
-            <Detail icon={<CalendarDays size={18} />}>
-              <When start={slot.start} end={slot.end} />
-            </Detail>
-          </>
-        )}
-        <Detail icon={<UserRound size={18} />}>
-          {booking.name} · {booking.email}
-        </Detail>
-      </ul>
-
       {confirmed && (
-        <div className="mt-4">
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          <a href={`/booking/${booking.id}/calendar`} className="btn btn-secondary sm:flex-1">
+            <CalendarPlus size={17} aria-hidden /> Add to calendar
+          </a>
           <CancelButton id={booking.id} />
         </div>
       )}
-    </div>
-  );
-}
-
-function Detail({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <li className="flex items-center gap-3 px-5 py-4">
-      <span className="text-muted" aria-hidden>
-        {icon}
-      </span>
-      <span>{children}</span>
-    </li>
+    </>
   );
 }

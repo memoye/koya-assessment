@@ -1,31 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f7f9;
+  color-scheme: light;
+  --background: #f8f7f4;
   --surface: #ffffff;
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --accent: #0f766e;
-  --accent-soft: #e6f4f1;
+  --foreground: #1c1b19;
+  --muted: #6f6b64;
+  --border: #e7e4dd;
+  --accent: #1f5135;
+  --accent-soft: #eaf1ec;
   --on-accent: #ffffff;
-  --danger: #dc2626;
-  --danger-soft: #fef2f2;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b0f14;
-    --surface: #131a22;
-    --foreground: #f1f5f9;
-    --muted: #94a3b8;
-    --border: #233040;
-    --accent: #2dd4bf;
-    --accent-soft: #0f2f2c;
-    --on-accent: #042f2e;
-    --danger: #f87171;
-    --danger-soft: #2a1414;
-  }
+  --danger: #b42318;
+  --danger-soft: #fef3f2;
 }
 
 @theme inline {
@@ -39,7 +25,8 @@
   --color-on-accent: var(--on-accent);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-instrument-sans);
+  --font-serif: var(--font-fraunces);
 }
 
 body {
@@ -51,22 +38,28 @@ body {
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-accent;
   }
+  h1 {
+    @apply font-serif text-[28px] leading-tight font-medium tracking-[-0.01em];
+  }
 }
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-border bg-surface;
+    @apply rounded-lg border border-border bg-surface;
   }
   .field {
-    @apply h-11 w-full rounded-xl border border-border bg-background px-3.5 text-base outline-none transition-colors placeholder:text-muted focus:border-accent focus:ring-3 focus:ring-accent/20;
+    @apply h-11 w-full rounded-md border border-border bg-surface px-3 text-base outline-none transition-colors focus:border-accent focus:ring-3 focus:ring-accent/15;
   }
   .btn {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-medium transition-colors disabled:opacity-60;
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-md px-5 text-[15px] font-medium transition-colors disabled:opacity-60;
   }
   .btn-primary {
     @apply bg-accent text-on-accent hover:bg-accent/90;
   }
   .btn-secondary {
-    @apply border border-border bg-surface hover:bg-background;
+    @apply border border-border bg-surface hover:border-foreground/30;
+  }
+  .label {
+    @apply text-[13px] font-medium text-muted;
   }
 }

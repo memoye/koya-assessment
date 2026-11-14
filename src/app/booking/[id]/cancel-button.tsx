@@ -10,17 +10,17 @@ export function CancelButton({ id }: { id: string }) {
 
   if (!confirming) {
     return (
-      <button onClick={() => setConfirming(true)} className="btn btn-secondary w-full text-danger">
+      <button onClick={() => setConfirming(true)} className="btn btn-secondary text-danger sm:flex-1">
         Cancel appointment
       </button>
     );
   }
 
   return (
-    <form action={cancelBookingAction} className="flex gap-2">
+    <form action={cancelBookingAction} className="flex gap-2 sm:flex-1">
       <input type="hidden" name="id" value={id} />
       <button type="button" onClick={() => setConfirming(false)} className="btn btn-secondary flex-1">
-        Keep it
+        Keep
       </button>
       <Submit />
     </form>

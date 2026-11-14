@@ -24,6 +24,18 @@ export function formatTime(iso: string, timeZone: string) {
   return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone }).format(new Date(iso));
 }
 
+/** "Mon 16 Nov" */
+export function formatShortDate(iso: string, timeZone: string) {
+  return new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone }).format(new Date(iso));
+}
+
+export type PartOfDay = "Morning" | "Afternoon" | "Evening";
+
+export function partOfDay(iso: string, timeZone: string): PartOfDay {
+  const hour = Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hourCycle: "h23", timeZone }).format(new Date(iso)));
+  return hour < 12 ? "Morning" : hour < 17 ? "Afternoon" : "Evening";
+}
+
 /** Calendar-tile parts: { weekday: "Mon", day: "16", month: "Nov" }. */
 export function dateParts(iso: string, timeZone: string) {
   const parts = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone }).formatToParts(new Date(iso));

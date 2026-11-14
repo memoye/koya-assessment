@@ -1,16 +1,13 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { listSlots } from "@/lib/service";
-import { SlotPicker } from "./slot-picker";
+import { BookingFlow } from "./booking-flow";
 
 export default function Home() {
   return (
-    <>
-      <h1 className="text-2xl font-semibold tracking-tight">Book an appointment</h1>
-      <Suspense fallback={<div className="card mt-8 h-72 animate-pulse" />}>
-        <Slots />
-      </Suspense>
-    </>
+    <Suspense fallback={<div className="card h-72 animate-pulse" />}>
+      <Booking />
+    </Suspense>
   );
 }
 
@@ -21,6 +18,6 @@ async function bookableSlots() {
   return (await listSlots(null)).filter((s) => s.available && Date.parse(s.start) > now);
 }
 
-async function Slots() {
-  return <SlotPicker slots={await bookableSlots()} />;
+async function Booking() {
+  return <BookingFlow slots={await bookableSlots()} />;
 }

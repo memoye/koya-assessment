@@ -1,14 +1,14 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { connection } from "next/server";
-import { CalendarX2, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { getSlotsByIds, listBookings } from "@/lib/service";
-import { DateTile, When } from "@/app/when";
+import { DateTile, TimeRange } from "@/app/when";
 
 export default function MyBookingsPage({ searchParams }: PageProps<"/my-bookings">) {
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">My bookings</h1>
+      <h1>My bookings</h1>
       <Suspense>
         <Results searchParams={searchParams} />
       </Suspense>
@@ -26,10 +26,10 @@ async function Results({ searchParams }: { searchParams: PageProps<"/my-bookings
           name="email"
           type="email"
           required
-          placeholder="Your email"
+          placeholder="Email you booked with"
           aria-label="Email"
           defaultValue={email}
-          className="field bg-surface"
+          className="field"
         />
         <button className="btn btn-primary">Find</button>
       </form>
@@ -49,34 +49,27 @@ async function BookingList({ email, cursor }: { email: string; cursor: string | 
 
   const { bookings, next_cursor } = result.body;
   if (bookings.length === 0) {
-    return (
-      <div className="card mt-6 flex flex-col items-center gap-3 px-6 py-12 text-center">
-        <CalendarX2 className="text-muted" size={28} aria-hidden />
-        <p className="font-medium">No bookings found</p>
-      </div>
-    );
+    return <p className="card mt-6 px-5 py-10 text-center text-muted">No bookings for {email}.</p>;
   }
   const slots = await getSlotsByIds(bookings.map((b) => b.slot_id));
 
   return (
     <>
-      <ul className="card mt-6 divide-y divide-border overflow-hidden">
+      <ul className="card mt-6 divide-y divide-border">
         {bookings.map((b) => {
           const slot = slots.get(b.slot_id);
           const cancelled = b.status === "cancelled";
           return (
             <li key={b.id}>
-              <Link href={`/booking/${b.id}`} className="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-background">
+              <Link href={`/booking/${b.id}`} className="flex items-center gap-3.5 px-4 py-3 hover:bg-background">
                 {slot && <DateTile iso={slot.start} muted={cancelled} />}
                 <span className={`min-w-0 flex-1 ${cancelled ? "text-muted" : ""}`}>
                   <span className="block font-medium">{slot?.provider}</span>
-                  <span className="block truncate text-sm text-muted">
-                    {slot && <When start={slot.start} end={slot.end} />}
+                  <span className="block text-sm text-muted">
+                    {slot && <TimeRange start={slot.start} end={slot.end} />}
+                    {cancelled && " · Cancelled"}
                   </span>
                 </span>
-                {cancelled && (
-                  <span className="rounded-full bg-background px-2.5 py-1 text-xs font-medium text-muted">Cancelled</span>
-                )}
                 <ChevronRight size={18} className="shrink-0 text-muted" aria-hidden />
               </Link>
             </li>
