@@ -1,7 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { refresh } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cancelBooking, createBooking } from "@/lib/service";
 
@@ -25,12 +25,13 @@ export async function bookSlot(_prev: BookState, formData: FormData): Promise<Bo
     idempotencyKey: String(formData.get("idempotency_key")) || null,
   });
 
+  // Availability changed (booked, or found taken): drop cached pages so lists are fresh.
+  if (result.status === 201 || result.status === 404 || result.status === 409) revalidatePath("/", "layout");
   if ("id" in result.body) redirect(`/booking/${result.body.id}`);
 
   let error = result.body.error;
   if (result.status === 404 || result.status === 409) {
-    error = "That time was just taken.";
-    refresh(); // drop it from the list behind the dialog
+    error = "Sorry, that time was just taken. Please choose another.";
   } else if (result.status === 429) {
     error = `Too many attempts. Try again in ${result.headers?.["Retry-After"]}s.`;
   }
@@ -45,5 +46,6 @@ export async function bookSlot(_prev: BookState, formData: FormData): Promise<Bo
 export async function cancelBookingAction(formData: FormData) {
   const id = String(formData.get("id"));
   await cancelBooking(id); // already cancelled is fine: the page shows the current state
+  revalidatePath("/", "layout"); // the slot is free again
   redirect(`/booking/${encodeURIComponent(id)}`);
 }

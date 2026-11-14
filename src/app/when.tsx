@@ -1,6 +1,6 @@
 "use client";
 
-import { dateParts, formatDay, formatTime, useTimeZone } from "@/lib/time";
+import { dateParts, formatDay, formatShortDate, formatTime, useTimeZone } from "@/lib/time";
 
 // Client components so dates render in the viewer's time zone.
 
@@ -10,6 +10,16 @@ export function When({ start, end }: { start: string; end: string }) {
   return (
     <>
       {formatDay(start, tz)}, {formatTime(start, tz)}–{formatTime(end, tz)}
+    </>
+  );
+}
+
+/** "Mon 16 Nov, 10:00" */
+export function ShortDateTime({ iso }: { iso: string }) {
+  const tz = useTimeZone();
+  return (
+    <>
+      {formatShortDate(iso, tz)}, {formatTime(iso, tz)}
     </>
   );
 }

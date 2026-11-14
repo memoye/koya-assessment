@@ -91,7 +91,30 @@ export async function listSlots(provider: string | null): Promise<SlotWithAvaila
   }));
 }
 
-/** For the web UI: slot details keyed by id. */
+// For the web UI. A slot is bookable when it hasn't started and has no confirmed booking.
+const BOOKABLE = `s.start_at > now() AND NOT EXISTS (
+  SELECT 1 FROM bookings b WHERE b.slot_id = s.id AND b.status = 'confirmed')`;
+
+/** Every bookable slot, earliest first. */
+export async function listBookableSlots(): Promise<Slot[]> {
+  const { rows } = await getPool().query<Slot>(
+    `SELECT s.id, s.provider, s.start_raw AS start, s.end_raw AS end
+       FROM slots s WHERE ${BOOKABLE} ORDER BY s.start_at, s.id`,
+  );
+  return rows;
+}
+
+/** One slot and whether it can still be booked (null if it doesn't exist). */
+export async function getSlot(id: string): Promise<(Slot & { bookable: boolean }) | null> {
+  const { rows } = await getPool().query<Slot & { bookable: boolean }>(
+    `SELECT s.id, s.provider, s.start_raw AS start, s.end_raw AS end, ${BOOKABLE} AS bookable
+       FROM slots s WHERE s.id = $1`,
+    [id],
+  );
+  return rows[0] ?? null;
+}
+
+/** Slot details keyed by id. */
 export async function getSlotsByIds(ids: string[]): Promise<Map<string, Slot>> {
   if (ids.length === 0) return new Map();
   const { rows } = await getPool().query<Slot>(
