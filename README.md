@@ -2,7 +2,14 @@
 
 A booking API for a clinic plus a small patient-facing web page that uses it. Built with Next.js 16 (App Router) and Postgres (Neon), deployed on Vercel.
 
-- **Web page:** `/` (soonest appointment, or doctor → date → time → details), `/booking/{id}` (confirmation, add to calendar via `/booking/{id}/calendar`, cancel), `/my-bookings` (paginated lookup by email). Doctors, dates and times all come from the slots in the database; nothing is hard-coded.
+- **Web page:** every step has its own URL, so Back, refresh and shared links all work:
+  - `/`: the soonest appointment and each doctor's next opening
+  - `/doctors/{doctor}?date=YYYY-MM-DD`: a doctor's days and times
+  - `/book/{slot_id}`: the patient's details; a taken slot says so
+  - `/booking/{id}`: confirmation, add to calendar (`/booking/{id}/calendar`), cancel
+  - `/my-bookings?email=`: paginated lookup by email
+
+  Doctors, dates and times all come from the slots in the database; nothing is hard-coded.
 - **API:** `POST /reset`, `GET /slots`, `POST /bookings`, `GET /bookings`, `GET /bookings/{id}`, `DELETE /bookings/{id}`. Every API request needs the `X-API-Key` header.
 
 ## How each level is met
