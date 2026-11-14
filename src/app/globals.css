@@ -1,22 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
+  --background: #f6f7f9;
   --surface: #ffffff;
-  --foreground: #171717;
-  --muted: #737373;
-  --border: #e5e5e5;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #0f766e;
+  --accent-soft: #e6f4f1;
+  --on-accent: #ffffff;
   --danger: #dc2626;
+  --danger-soft: #fef2f2;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --surface: #171717;
-    --foreground: #fafafa;
-    --muted: #a3a3a3;
-    --border: #262626;
+    --background: #0b0f14;
+    --surface: #131a22;
+    --foreground: #f1f5f9;
+    --muted: #94a3b8;
+    --border: #233040;
+    --accent: #2dd4bf;
+    --accent-soft: #0f2f2c;
+    --on-accent: #042f2e;
     --danger: #f87171;
+    --danger-soft: #2a1414;
   }
 }
 
@@ -26,7 +34,11 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
   --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --font-sans: var(--font-geist-sans);
 }
 
@@ -35,11 +47,26 @@ body {
   color: var(--foreground);
 }
 
+@layer base {
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
+
 @layer components {
+  .card {
+    @apply rounded-2xl border border-border bg-surface;
+  }
   .field {
-    @apply w-full rounded-lg border border-border bg-background px-3 py-2 outline-none placeholder:text-muted focus:border-foreground;
+    @apply h-11 w-full rounded-xl border border-border bg-background px-3.5 text-base outline-none transition-colors placeholder:text-muted focus:border-accent focus:ring-3 focus:ring-accent/20;
   }
   .btn {
-    @apply rounded-lg px-4 py-2 text-sm font-medium;
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-medium transition-colors disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply bg-accent text-on-accent hover:bg-accent/90;
+  }
+  .btn-secondary {
+    @apply border border-border bg-surface hover:bg-background;
   }
 }

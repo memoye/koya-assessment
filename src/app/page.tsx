@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <>
       <h1 className="text-2xl font-semibold tracking-tight">Book an appointment</h1>
-      <Suspense fallback={<div className="mt-8 h-64 animate-pulse rounded-xl bg-border/50" />}>
+      <Suspense fallback={<div className="card mt-8 h-72 animate-pulse" />}>
         <Slots />
       </Suspense>
     </>

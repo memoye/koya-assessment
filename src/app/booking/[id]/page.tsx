@@ -1,13 +1,14 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { CalendarDays, Check, Stethoscope, UserRound, X } from "lucide-react";
 import { getBooking, getSlotsByIds } from "@/lib/service";
-import { cancelBookingAction } from "@/app/actions";
 import { When } from "@/app/when";
+import { CancelButton } from "./cancel-button";
 
 export default function BookingPage({ params }: PageProps<"/booking/[id]">) {
   return (
-    <Suspense fallback={<div className="h-48 animate-pulse rounded-xl bg-border/50" />}>
+    <Suspense fallback={<div className="card mx-auto h-80 max-w-md animate-pulse" />}>
       <Booking params={params} />
     </Suspense>
   );
@@ -23,28 +24,50 @@ async function Booking({ params }: { params: PageProps<"/booking/[id]">["params"
   const confirmed = booking.status === "confirmed";
 
   return (
-    <>
-      <h1 className="text-2xl font-semibold tracking-tight">{confirmed ? "Booked" : "Cancelled"}</h1>
-
-      <div className={`mt-6 rounded-xl border border-border bg-surface p-5 ${confirmed ? "" : "text-muted"}`}>
-        {slot && (
-          <>
-            <p className="font-medium">{slot.provider}</p>
-            <p className="text-muted">
-              <When start={slot.start} end={slot.end} />
-            </p>
-          </>
-        )}
-        <p className="mt-4">{booking.name}</p>
-        <p className="text-muted">{booking.email}</p>
+    <div className="mx-auto max-w-md">
+      <div className="flex flex-col items-center text-center">
+        <span
+          className={`grid size-14 place-items-center rounded-full ${
+            confirmed ? "bg-accent text-on-accent" : "bg-border text-muted"
+          }`}
+        >
+          {confirmed ? <Check size={28} strokeWidth={2.5} aria-hidden /> : <X size={28} aria-hidden />}
+        </span>
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight">
+          {confirmed ? "You’re booked" : "Appointment cancelled"}
+        </h1>
       </div>
 
+      <ul className={`card mt-8 divide-y divide-border text-[15px] ${confirmed ? "" : "text-muted"}`}>
+        {slot && (
+          <>
+            <Detail icon={<Stethoscope size={18} />}>{slot.provider}</Detail>
+            <Detail icon={<CalendarDays size={18} />}>
+              <When start={slot.start} end={slot.end} />
+            </Detail>
+          </>
+        )}
+        <Detail icon={<UserRound size={18} />}>
+          {booking.name} · {booking.email}
+        </Detail>
+      </ul>
+
       {confirmed && (
-        <form action={cancelBookingAction} className="mt-4">
-          <input type="hidden" name="id" value={booking.id} />
-          <button className="btn border border-border text-danger">Cancel booking</button>
-        </form>
+        <div className="mt-4">
+          <CancelButton id={booking.id} />
+        </div>
       )}
-    </>
+    </div>
+  );
+}
+
+function Detail({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <li className="flex items-center gap-3 px-5 py-4">
+      <span className="text-muted" aria-hidden>
+        {icon}
+      </span>
+      <span>{children}</span>
+    </li>
   );
 }
